@@ -1,15 +1,6 @@
-#!/usr/bin/env bash
-# delete.sh – Silent destroy (no prompts)
-set -euo pipefail
+#!/bin/bash
 
-echo "Destroying Minikube cluster..."
-
-# Auto-fill variables
-export TF_VAR_HOSTED_ZONE="vitingousa.live"
-export TF_VAR_ssh_public_key="${HOME}/.ssh/minikube_key.pub"
-
-terraform init -upgrade
+read -p 'Enter DNS Hosted Zone Name: ' hname
+export TF_VAR_HOSTED_ZONE=${hname}
+terraform init
 terraform destroy -auto-approve
-
-rm -f ~/.kube/config
-echo "Cluster destroyed."
