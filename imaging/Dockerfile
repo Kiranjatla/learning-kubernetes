@@ -9,6 +9,8 @@ RUN yum install -y epel-release && \
     yum clean all && \
     rm -rf /var/cache/yum
 
+ENTRYPOINT ["nginx", "-g" "daemon off;"]
+
 # Expose NGINX default port
 EXPOSE 80
 
