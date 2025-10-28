@@ -1,54 +1,17 @@
-terraform {
-  required_version = ">= 1.6.0"
-
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.70"
-    }
-  }
-}
-
-provider "aws" {
-  region = "us-east-1"
-}
-
-
-module "vpc" {
-  source  = "terraform-aws-modules/vpc/aws"
-
-  name = "k8s-vpc"
-  cidr = "10.0.0.0/16"
-
-  azs             = ["us-east-1a"]
-  public_subnets  = ["10.0.101.0/24"]
-
-  enable_nat_gateway = false
-  enable_vpn_gateway = false
-
-  tags = {
-    Terraform = "true"
-    Name      = "k8s-vpc"
-  }
-}
-
-
-
 module "minikube" {
   source = "github.com/scholzj/terraform-aws-minikube"
 
   aws_region        = "us-east-1"
   cluster_name      = "minikube"
   aws_instance_type = "t3.medium"
-  ssh_public_key    = var.ssh_public_key
+  ssh_public_key    = "~/.ssh/id_rsa.pub"
   aws_subnet_id     = module.vpc.public_subnets[0]
-  //ami_image_id = data.aws_ami.amazon_linux_2.id
-  hosted_zone       = var.HOSTED_ZONE
+  //ami_image_id        = data.aws_ami.ami.id
+  hosted_zone         = var.HOSTED_ZONE
   hosted_zone_private = false
 
   tags = {
     Application = "Minikube"
-    Environment = "lab"
   }
 
   addons = [
@@ -59,10 +22,29 @@ module "minikube" {
   ]
 }
 
+variable "HOSTED_ZONE" {}
 
-variable "HOSTED_ZONE" {
+provider "aws" {
+  region = "us-east-1"
 }
 
+module "vpc" {
+  source = "terraform-aws-modules/vpc/aws"
+
+  name = "k8s-vpc"
+  cidr = "10.0.0.0/16"
+
+  azs            = ["us-east-1a"]
+  public_subnets = ["10.0.101.0/24"]
+
+  enable_nat_gateway = false
+  enable_vpn_gateway = false
+
+  tags = {
+    Terraform = "true"
+    Name      = "k8s-vpc"
+  }
+}
 
 output "MINIKUBE_SERVER" {
   value = "ssh centos@${module.minikube.public_ip}"
