@@ -3,5 +3,13 @@
 
 FROM rockylinux:8
 
+# Install EPEL and NGINX in a single layer
 RUN yum install -y epel-release && \
-    yum clean all
+    yum install -y nginx && \
+    yum clean all && \
+    rm -rf /var/cache/yum
+
+# Expose NGINX default port
+EXPOSE 80
+
+
