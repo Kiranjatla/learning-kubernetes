@@ -35,15 +35,20 @@ module "vpc" {
 }
 
 # ------------------------------------------------------------
-# CentOS 7 AMI (recommended for stability)
+# AlmaLinux 8 AMI (official CentOS 7 replacement)
 # ------------------------------------------------------------
-data "aws_ami" "centos7" {
+data "aws_ami" "almalinux8" {
   most_recent = true
-  owners      = ["679593333241"]  # Official CentOS
+  owners      = ["amazon"]  # Official AWS
 
   filter {
     name   = "name"
-    values = ["CentOS 7.* x86_64"]
+    values = ["AlmaLinux OS 8.* x86_64*"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
   }
 
   filter {
@@ -63,7 +68,7 @@ module "minikube" {
   aws_instance_type = "t3.medium"
   ssh_public_key    = var.ssh_public_key
   aws_subnet_id     = module.vpc.public_subnets[0]
-  ami_image_id      = data.aws_ami.centos7.id
+  ami_image_id = data.aws_ami.almalinux8.id
   hosted_zone       = var.HOSTED_ZONE
   hosted_zone_private = false
 
@@ -107,10 +112,9 @@ output "SSH_COMMAND" {
 }
 
 output "KUBECTL_SETUP" {
-  description = "Commands to set up kubectl locally"
-  value       = <<EOT
+  value = <<EOT
 mkdir -p ~/.kube
-scp -i ${replace(var.ssh_public_key, ".pub", "")} centos@${module.minikube.public_ip}:kubeconfig ~/.kube/config
+scp -i ~/.ssh/minikube_key centos@${module.minikube.public_ip}:kubeconfig ~/.kube/config
 EOT
 }
 
