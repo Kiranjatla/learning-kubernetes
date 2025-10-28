@@ -37,23 +37,26 @@ module "vpc" {
 # ------------------------------------------------------------
 # AlmaLinux 8 AMI (official CentOS 7 replacement)
 # ------------------------------------------------------------
-data "aws_ami" "almalinux8" {
+# ------------------------------------------------------------
+# Amazon Linux 2 AMI (always available, fast, reliable)
+# ------------------------------------------------------------
+data "aws_ami" "amazon_linux_2" {
   most_recent = true
-  owners      = ["amazon"]  # Official AWS
+  owners      = ["amazon"]
 
   filter {
     name   = "name"
-    values = ["AlmaLinux OS 8.* x86_64*"]
-  }
-
-  filter {
-    name   = "architecture"
-    values = ["x86_64"]
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
   }
 
   filter {
     name   = "virtualization-type"
     values = ["hvm"]
+  }
+
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
   }
 }
 
@@ -68,7 +71,7 @@ module "minikube" {
   aws_instance_type = "t3.medium"
   ssh_public_key    = var.ssh_public_key
   aws_subnet_id     = module.vpc.public_subnets[0]
-  ami_image_id = data.aws_ami.almalinux8.id
+  ami_image_id = data.aws_ami.amazon_linux_2.id
   hosted_zone       = var.HOSTED_ZONE
   hosted_zone_private = false
 
