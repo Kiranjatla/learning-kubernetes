@@ -4,7 +4,7 @@ module "minikube" {
   aws_region        = "us-east-1"
   cluster_name      = "minikube"
   aws_instance_type = "t3.medium"
-  ssh_public_key = file("~/.ssh/minikube_key.pub")
+  ssh_public_key = "/home/centos/.ssh/minikube_key.pub"
   aws_subnet_id     = module.vpc.public_subnets[0]
   //ami_image_id        = data.aws_ami.ami.id
   hosted_zone         = var.HOSTED_ZONE
